@@ -13,7 +13,7 @@ This repo provides a lean, token-efficient `.claude/` configuration optimized fo
 ### 1. Copy everything into your project
 
 ```bash
-git clone https://github.com/poshan0126/dotclaude.git /tmp/dotclaude
+git clone https://github.com/jsingason/dotclaude.git /tmp/dotclaude
 
 cd your-project
 mkdir -p .claude
