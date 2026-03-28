@@ -63,6 +63,7 @@ Every change is confirmed with you before it's applied.
 | Skills or agents not showing up | **Restart Claude Code** — skills/agents/rules are loaded at session start |
 | Hooks not running | Run `chmod +x .claude/hooks/*.sh` and verify `jq` is installed |
 | "jq not found" blocking everything | Install jq: `brew install jq` (macOS) or `apt install jq` (Linux) |
+| Don't want hooks at all | Delete the `hooks/` directory and remove the `hooks` section from `settings.json` — Claude Code works fine without them |
 | format-on-save not formatting | Ensure the formatter binary is installed locally and its config file exists in the project root |
 | Permission denied on allowed commands | Check glob syntax in `settings.json` — `Bash(npm run test *)` means the `*` matches arguments after `test` |
 | `/setupdotclaude` asks to confirm settings.json edits | This is expected — `protect-files.sh` prompts for confirmation when editing `settings.json` (hook scripts remain hard-blocked) |
@@ -95,6 +96,8 @@ Skills are invoked with `/name` in your Claude Code session. All skills except `
 | `/explain` | `[file, function, or concept]` | Explains code with a one-sentence summary, mental model analogy, ASCII diagram, key non-obvious details, and modification guide. Focuses on the "why" and landmines, not the obvious. |
 | `/refactor` | `[file, function, or pattern]` | Safe refactoring with tests as a safety net. Writes tests first if none exist, plans transformations, makes small testable steps, verifies after each step. Never mixes refactoring with behavior changes. |
 | `/test-writer` | *(auto-triggers)* | Writes comprehensive tests for new or changed code. Discovers changes via git diff, maps all code paths (happy, edge, error, concurrency), writes one test per scenario with Arrange-Act-Assert. **This is the only skill that can auto-trigger** — Claude may invoke it automatically after you add new features. |
+| `/git-version-control` | — | Single config point for your git hosting CLI (gh, glab, etc.). Auto-invoked by other skills that need platform ops — create/view PRs, check CI status, fetch issues. Configured by `/setupdotclaude`. |
+| `/learn-lesson` | — | After any mistake, classifies it (recurring vs one-off) and appends a lesson bullet to `.claude/rules/lessons.md` if it's likely to recur. Keeps Claude from repeating the same mistakes across sessions. |
 
 ## Agents (Subagents)
 
@@ -107,6 +110,7 @@ Agents are specialized Claude instances that run in their own isolated context. 
 | `@performance-reviewer` | Auto-delegated by `/pr-review` when performance-sensitive code is changed | Finds real bottlenecks, not theoretical micro-optimizations. Checks for N+1 queries, missing indexes, unbounded queries, memory leaks, repeated computation, blocking I/O on hot paths, unnecessary re-renders, bundle size issues, and lock contention. Only flags issues with measurable impact. |
 | `@frontend-designer` | Auto-delegated when building UI, or invoke directly | Creates distinctive, production-grade frontend UI that avoids generic "AI aesthetics." Enforces design tokens, chooses appropriate design principles (glassmorphism, brutalism, editorial, etc.), ensures accessibility (WCAG), and prevents common anti-patterns like purple gradients, centered-everything layouts, and overused fonts. |
 | `@doc-reviewer` | Auto-delegated by `/pr-review` when documentation changes | Reviews docs for accuracy by cross-referencing actual source code. Verifies function signatures, code examples, config options, and file paths are correct. Identifies stale references, missing prerequisites, undocumented error cases, and unclear instructions. |
+| `@orchestrator` | Any multi-agent task, including `/pr-review` | General-purpose coordinator — breaks tasks into parallel workstreams, dispatches specialist agents with full context embedded, synthesizes results into a unified output. Use directly for any task that benefits from multiple specialists running in parallel. |
 
 ### Using Agents Directly
 
@@ -180,13 +184,16 @@ dotclaude/
 │   ├── tdd/SKILL.md                    #   /tdd — strict red-green-refactor TDD loop
 │   ├── explain/SKILL.md                #   /explain <file-or-function>
 │   ├── refactor/SKILL.md               #   /refactor <target>
-│   └── test-writer/SKILL.md            #   Auto-triggers on new features — comprehensive tests
+│   ├── test-writer/SKILL.md            #   Auto-triggers on new features — comprehensive tests
+│   ├── git-version-control/SKILL.md    #   Git hosting CLI config (gh/glab) — auto-invoked by other skills
+│   └── learn-lesson/SKILL.md           #   After mistakes: classify and record recurring patterns
 ├── agents/                             # Specialized subagents → copy to .claude/agents/
 │   ├── frontend-designer.md            #   Creates distinctive UI — anti-AI-slop
 │   ├── security-reviewer.md            #   Security-focused code review
 │   ├── performance-reviewer.md         #   Finds real bottlenecks, not theoretical ones
 │   ├── code-reviewer.md                #   General code review
-│   └── doc-reviewer.md                 #   Documentation accuracy and completeness
+│   ├── doc-reviewer.md                 #   Documentation accuracy and completeness
+│   └── orchestrator.md                 #   General coordinator — parallel agent dispatch, unified synthesis
 └── hooks/                              # Hook scripts → copy to .claude/hooks/
     ├── protect-files.sh                #   Block edits to sensitive files and directories
     ├── warn-large-files.sh             #   Block writes to build artifacts and binary files
