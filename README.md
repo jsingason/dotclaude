@@ -87,6 +87,7 @@ Skills are invoked with `/name` in your Claude Code session. All skills except `
 
 | Command | Arguments | Description |
 |---------|-----------|-------------|
+| `/feature` | `[description]` | Build a new feature end-to-end. Classifies the work (backend/frontend/full-stack), plans with `@orchestrator`, uses `/tdd` for all backend logic, delegates UI to `@frontend-designer`, and runs a final `@orchestrator` review before shipping. |
 | `/setupdotclaude` | `[focus area]` | Scan your codebase and customize all `.claude/` config files to match your actual tech stack. Run once after copying dotclaude into a project. Detects language, framework, package manager, test runner, linter, and architecture — then updates CLAUDE.md, settings.json, rules, hooks, and agents. Confirms every change before applying. |
 | `/debug-fix` | `[issue #, error msg, or description]` | Find and fix a bug from any source. Reproduces the issue, traces root cause through code and git history, makes the minimal fix, writes a regression test, and wraps up with a branch and commit. |
 | `/ship` | `[commit message or PR title]` | Full shipping workflow: scans changes, stages files (skipping secrets/locks/build output), drafts a commit message matching repo style, pushes, and creates a PR. Every step requires your confirmation. |
@@ -176,6 +177,7 @@ dotclaude/
 │   ├── security.md                     #   Security rules (loads near API/auth files)
 │   └── frontend.md                     #   Design tokens, principles, accessibility (loads near UI files)
 ├── skills/                             # Slash commands → copy to .claude/skills/
+│   ├── feature/SKILL.md                #   /feature — classify, plan, tdd, frontend-designer, review, ship
 │   ├── setupdotclaude/SKILL.md         #   /setupdotclaude — scan codebase, customize all config files
 │   ├── debug-fix/SKILL.md              #   /debug-fix — find and fix bugs from any source
 │   ├── ship/SKILL.md                   #   /ship — commit, push, PR with confirmations

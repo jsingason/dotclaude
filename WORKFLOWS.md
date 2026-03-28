@@ -33,38 +33,27 @@ Agents run in **isolated context** — no conversation history, but full codebas
 
 ---
 
-## Adding a Feature (Simple)
+## Adding a Feature
 
-No planning needed — scope is clear, change is small.
-
-```mermaid
-flowchart TD
-    A([Describe feature to Claude]) --> B[/tdd — red/green/refactor loop/]
-    B --> C{tests pass?}
-    C -- no --> B
-    C -- yes --> D[/test-writer auto-triggers/]
-    D --> E[/ship — stage, commit, push, PR/]
-```
-
----
-
-## Adding a Feature (Complex)
-
-Unclear scope, multiple files, or architectural impact.
+Use `/feature [description]` — works for any scope.
 
 ```mermaid
 flowchart TD
-    A([Describe feature to Claude]) --> B[Shift+Tab → Plan Mode]
-    B --> C[Review plan & unresolved questions]
-    C --> D{plan looks good?}
-    D -- revise --> B
-    D -- yes --> E[Exit plan mode, implement]
-    E --> F[/tdd — one behavior at a time/]
-    F --> G{all behaviors done?}
-    G -- no --> F
-    G -- yes --> H[/test-writer auto-triggers/]
-    H --> I[/pr-review — before shipping/]
-    I --> J[/ship/]
+    A([/feature description]) --> B[Classify: backend / frontend / full-stack]
+    B --> C[@orchestrator — plan & breakdown]
+    C --> D[Review plan with user]
+    D --> E{plan confirmed?}
+    E -- revise --> C
+    E -- yes --> F{type?}
+    F -- backend --> G[/tdd — red/green/refactor per behavior]
+    F -- frontend --> H[@frontend-designer]
+    F -- full-stack --> G
+    G --> I{all behaviors done?}
+    I -- no --> G
+    I -- yes --> H
+    H --> J[@orchestrator — correctness & integration review]
+    J --> K[/test-writer auto-triggers if gaps]
+    K --> L[/ship]
 ```
 
 ---

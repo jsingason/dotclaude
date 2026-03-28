@@ -6,6 +6,8 @@ Slash commands. Run in main conversation context (see all rules + CLAUDE.md).
 
 ## Available
 
+**/feature** `[description]` — classify → plan with @orchestrator → /tdd for backend → @frontend-designer for UI → @orchestrator review → /ship.
+
 **/setupdotclaude** `[focus]` — scan project, customize all `.claude/` files for actual stack. Run once after install.
 
 **/debug-fix** `[issue/error/desc]` — understand → reproduce → investigate → fix → verify → commit.
