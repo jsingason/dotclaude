@@ -42,6 +42,13 @@ Detect linter/formatter from config files (`.eslintrc.*`, `.prettierrc.*`, `biom
 
 Detect folder structure pattern (feature-based, layered, monorepo, MVC) and locate source, test, API, and auth directories.
 
+Detect i18n: check deps (`i18next`, `react-i18next`, `next-intl`, `next-i18next`, `vue-i18n`, `@angular/localize`, `@lingui/core`, `react-intl`, `formatjs`, `fluent`, `rosetta`, `typesafe-i18n`), config files (`i18n.config.*`, `lingui.config.*`, `next-i18next.config.*`), locale dirs (`locales/`, `messages/`, `i18n/`, `translations/`, `lang/`). If found:
+- Record library, locale dir paths, all active locales
+- Sample 5–10 keys → detect naming convention (dot-namespace, camelCase, SCREAMING_SNAKE, etc.)
+- Detect file format (JSON, YAML, PO, TypeScript, CSV)
+- Check for generated output: CSV files near locale dir (`translations.csv`, `strings.csv`), `package.json` scripts named `generate:i18n`/`extract:translations`, tools like `i18next-parser`/`lingui extract`/`formatjs extract`, or auto-generated headers inside locale files. If found: record source path + generation command, set `I18N_GENERATED=true`
+- Set `I18N=true`
+
 Check `git log --oneline -20` for commit message style.
 
 Detect git hosting from `git remote get-url origin`:
@@ -67,6 +74,7 @@ I scanned your project. Here's what I found:
 **Test dirs**: [list]
 **Git remote**: [url]
 **Git CLI (detected)**: [gh / glab / az repos / none / unknown]
+**i18n**: [library name + locale paths, or "none detected"]
 
 Should I customize the .claude/ files based on this? (yes/no/corrections)
 ```
@@ -301,7 +309,7 @@ Update the `paths:` frontmatter to match actual backend directories (same paths 
 
 For each hook the user **disabled**, remove its block from `settings.json`. For each hook the user **kept**, apply the project-specific config below:
 
-**hook 1 — protect-files.sh**: No configuration needed. Check `protect-files.sh` for hardcoded paths; if the project uses non-standard secret/generated file patterns, add them.
+**hook 1 — protect-files.sh**: No configuration needed. Check `protect-files.sh` for hardcoded paths; if the project uses non-standard secret/generated file patterns, add them. If `I18N_GENERATED=true`, add the generated locale output files/directories to the protected list so they cannot be edited by hand.
 
 **hook 2 — warn-large-files.sh**: No configuration needed. Blocks standard build artifact dirs by default.
 
@@ -321,6 +329,18 @@ For each hook the user **disabled**, remove its block from `settings.json`. For 
 **hook 6 — session-start.sh**: No configuration needed. Injects git state automatically.
 
 **hook 7 — notifications**: Already inline in `settings.json` (not a shell script). If disabled, remove the `Notification` block from `settings.json`.
+
+### 3.8 — rules/i18n.md _(only if I18N=true)_
+
+Use Phase 1 results — no re-scanning:
+
+- `paths:` frontmatter: narrow to actual locale dirs + source file (if `I18N_GENERATED=true`)
+- **Active Locales** comment: list all detected locales
+- **Key Naming** table: annotate active convention (`← this project`)
+- Formats table: remove unused rows
+- **Source of Truth** section: fill in source path + generate command if `I18N_GENERATED=true`; delete section if false
+
+If `I18N=false`: delete `rules/i18n.md`.
 
 ### 3.9 — rules/database.md
 
@@ -352,6 +372,7 @@ Review the entire codebase alongside the customized `.claude/` configuration:
 - Do the settings permissions cover the commands the project actually uses?
 - Do the security rule paths match where sensitive code actually lives?
 - Do the hook protections cover the files that actually need protecting in this project?
+- If I18N=true: do the locale paths in `rules/i18n.md` match the actual files? Are all active locales listed?
 - Are there project patterns, conventions, or architectural decisions not yet captured in the config?
 - Remove any redundancy introduced during customization
 - Ensure no file contradicts another
@@ -374,6 +395,7 @@ Setup complete. Here's what was customized:
 - CLAUDE.md + skill allowed-tools: git CLI configured for [gh/glab/az repos/none]
 - rules/security.md: paths updated to [actual dirs]
 - rules/frontend.md: [kept/removed]
+- rules/i18n.md: [kept with paths updated for X locales / removed (no i18n detected)]
 - hooks/format-on-save.sh: enabled [formatter]
 - [any other changes]
 
