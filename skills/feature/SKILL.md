@@ -1,6 +1,6 @@
 ---
 name: feature
-description: Build a new feature — plan with @orchestrator, /tdd for backend, @frontend-designer for UI, @orchestrator review before ship
+description: Build a new feature — plan with normal or superpowers mode, /tdd for backend, @frontend-designer for UI, @orchestrator review before ship
 argument-hint: "[feature description]"
 disable-model-invocation: true
 ---
@@ -26,11 +26,13 @@ If no, continue on the current branch.
 - **Full-stack** — both
 - **Unclear** — ask before proceeding
 
-## 2. Plan → @orchestrator
+## 2. Plan
 
-Pass: feature description, classification, known file paths.
-Get back: work breakdown, files affected, ambiguities.
-Confirm plan with user. Don't implement until confirmed.
+Ask the user: "Which planning mode? (1) Normal plan mode — inline plan here, or (2) Superpowers plan mode — delegate to @orchestrator (if available)"
+
+**Normal plan mode:** Produce the plan inline — work breakdown, files affected, ambiguities — then confirm with user before implementing.
+
+**Superpowers plan mode:** Pass feature description, classification, and known file paths to @orchestrator. Get back work breakdown, files affected, ambiguities. Confirm plan with user. Don't implement until confirmed.
 
 ## 3. Implement
 
@@ -53,7 +55,7 @@ Pass all changed files. Correctness + integration check. Fix findings before shi
 
 ## Rules
 
-- Never skip @orchestrator planning
+- Always ask about plan mode before planning
 - No backend code without /tdd
 - No UI without @frontend-designer
-- Scope grows → pause, re-plan with @orchestrator
+- Scope grows → pause, re-plan using the same mode chosen in step 2
