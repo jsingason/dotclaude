@@ -7,6 +7,18 @@ disable-model-invocation: true
 
 Feature: **$ARGUMENTS**
 
+## 0. Branch Setup
+
+Ask the user: "Create a feature branch for this work? (y/n)"
+
+If yes:
+1. `git pull` to sync with remote
+2. Generate a descriptive branch name from the feature description (e.g. `feat/add-user-authentication`)
+3. `git checkout -b <branch-name>`
+4. Confirm the branch was created before proceeding
+
+If no, continue on the current branch.
+
 ## 1. Classify
 
 - **Backend** — services, APIs, models, business logic, jobs
