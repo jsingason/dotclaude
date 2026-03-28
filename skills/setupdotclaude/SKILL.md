@@ -73,6 +73,43 @@ Should I customize the .claude/ files based on this? (yes/no/corrections)
 
 If the user provides corrections, incorporate them.
 
+## Phase 2b: Configure Hooks & Workflow
+
+### 2b.1 — Hook Opt-In
+
+Present each hook and ask whether to enable it (all on by default):
+
+```
+Which hooks do you want enabled?
+
+1. protect-files      — blocks writes to .env, secrets, keys, certs, lock files, generated files, settings.json. Prevents accidental overwrites.
+2. warn-large-files   — blocks writes to node_modules/, dist/, build dirs, binaries. Prevents wasted edits on untracked artifacts.
+3. scan-secrets       — scans content before writing; blocks if API keys, tokens, or credentials are detected.
+4. block-dangerous-commands — blocks force-push to main/master, rm -rf /, DROP without WHERE, chmod 777, curl|bash.
+5. format-on-save     — auto-runs your formatter (Prettier/Ruff/rustfmt/etc.) after each file edit.
+6. session-start      — injects branch, last commit, uncommitted count, and stash count into each session.
+7. notifications      — sends a desktop notification (macOS: osascript, Linux: notify-send) when Claude needs attention.
+
+Enable all? (yes / or specify numbers to disable, e.g. "disable 5 7")
+```
+
+For each disabled hook, remove its entry from `settings.json`. If **all hooks are disabled**, ask: "Remove the entire `hooks` block from settings.json and delete the hooks/ folder? (yes/no)" — if yes, remove the whole block and delete `.claude/hooks/`. For enabled hooks, proceed with per-hook config in section 3.7.
+
+### 2b.2 — Feature Branch vs Worktree Workflow
+
+Ask:
+
+```
+How do you prefer to isolate feature work?
+
+  1. feature-branches — checkout a new branch in your working directory (standard git flow)
+  2. worktrees        — each feature gets its own directory via `git worktree add`, keeping your working dir clean
+
+Which do you prefer? (1/2, default: 1)
+```
+
+If worktrees: add a line to `CLAUDE.md` under the Workflow section: "Use `git worktree` for feature isolation — don't checkout branches in the main working directory."
+
 ## Phase 3: Customize Each File
 
 For each file below, propose the specific changes and ask the user to confirm before applying.
@@ -192,20 +229,30 @@ Update the `paths:` frontmatter to match actual backend directories (same paths 
 - **If frontend exists**: update the Component Framework table to highlight which options the project actually uses (detected from dependencies)
 - Update path patterns in frontmatter if the project uses non-standard directories
 
-### 3.7 — hooks/format-on-save.sh
+### 3.7 — hooks/ _(apply per user choices from Phase 2b.1)_
 
-Uncomment the section matching the detected formatter:
-- Prettier found → uncomment Node.js section
-- Black/isort found → uncomment Python section
-- Ruff found → uncomment Ruff section
-- Biome found → uncomment Biome section
-- rustfmt found → uncomment Rust section
-- gofmt found → uncomment Go section
+For each hook the user **disabled**, remove its block from `settings.json`. For each hook the user **kept**, apply the project-specific config below:
+
+**hook 1 — protect-files.sh**: No configuration needed. Check `protect-files.sh` for hardcoded paths; if the project uses non-standard secret/generated file patterns, add them.
+
+**hook 2 — warn-large-files.sh**: No configuration needed. Blocks standard build artifact dirs by default.
+
+**hook 3 — scan-secrets.sh**: No configuration needed. Pattern-based; works across all projects.
+
+**hook 4 — block-dangerous-commands.sh**: Check the default branch name (`git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null` or `git remote show origin`). If it's not `main` or `master`, update the regex pattern in the script.
+
+**hook 5 — format-on-save.sh**: Uncomment the section matching the detected formatter:
+- Prettier → uncomment Node.js section
+- Black/isort → uncomment Python section
+- Ruff → uncomment Ruff section
+- Biome → uncomment Biome section
+- rustfmt → uncomment Rust section
+- gofmt → uncomment Go section
 - Multiple languages → uncomment all relevant sections
 
-### 3.8 — hooks/block-dangerous-commands.sh
+**hook 6 — session-start.sh**: No configuration needed. Injects git state automatically.
 
-Check the default branch name (`git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null` or `git remote show origin`). If it's not `main` or `master`, update the regex pattern.
+**hook 7 — notifications**: Already inline in `settings.json` (not a shell script). If disabled, remove the `Notification` block from `settings.json`.
 
 ### 3.9 — rules/database.md
 
