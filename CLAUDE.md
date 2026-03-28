@@ -44,6 +44,18 @@ npm run dev              # start dev server
 - Prefer fixing the root cause over adding workarounds
 - When unsure about approach, use plan mode (`Shift+Tab`) before coding
 
+## Agents
+
+Delegate to specialist agents whenever possible — they run in parallel, keep the main context clean, and produce better focused output than inline reasoning.
+
+- **Any code review** → `@code-reviewer` (or `/pr-review` to auto-dispatch all relevant specialists)
+- **Security-sensitive changes** → `@security-reviewer`
+- **Performance-sensitive code** → `@performance-reviewer`
+- **UI / frontend work** → `@frontend-designer`
+- **Docs changed** → `@doc-reviewer`
+- **Multi-specialist or complex task** → `@orchestrator` — breaks into parallel workstreams, synthesizes results
+- **When in doubt** → use `@orchestrator`; it will decide which specialists to invoke
+
 ## Don'ts
 
 - Don't modify generated files (`*.gen.ts`, `*.generated.*`)
