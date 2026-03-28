@@ -12,8 +12,6 @@ allowed-tools:
   - Bash(git push *)
   - Bash(git checkout *)
   - Bash(git branch *)
-  - Bash(gh pr create *)
-  - Bash(gh pr view *)
 ---
 
 Ship the current changes through commit, push, and PR creation. Confirm with the user before each step using the AskUserQuestion tool.
@@ -53,13 +51,13 @@ Ship the current changes through commit, push, and PR creation. Confirm with the
 
 ## Step 4: Pull Request
 
-- Check if a PR already exists for this branch (`gh pr view` — if it exists, show the URL and stop)
+- Use /git-version-control to check if a PR already exists for this branch — if it does, show the URL and stop
 - Analyze ALL commits on this branch vs the base branch (not just the latest commit)
 - Draft a PR title (under 72 chars) and body with:
   - Summary: 2-4 bullet points
   - Test plan: how to verify
 - **ASK the user to confirm or edit** the title and body
-- Only after confirmation: create the PR with `gh pr create`
+- Only after confirmation: use /git-version-control to create the PR
 - Show the PR URL when done
 
 ## Rules

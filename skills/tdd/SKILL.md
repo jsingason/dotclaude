@@ -9,62 +9,63 @@ Build the following using strict Test-Driven Development:
 
 **Feature**: $ARGUMENTS
 
-## The TDD Cycle
-
 Repeat this cycle for each behavior. Never skip steps.
 
-### Red: Write a Failing Test
+---
 
-1. Write ONE test for the smallest next behavior (not the whole feature)
-2. The test must:
-   - Describe the behavior in its name: `should return 0 for empty cart`
-   - Use Arrange-Act-Assert structure
-   - Assert specific values, not vague truths
-3. **Run the test. It MUST fail.** If it passes, either:
-   - The behavior already exists (skip to the next behavior)
-   - The test is wrong (it's not testing what you think — fix it)
-4. Verify the failure message makes sense — it should tell you what's missing
+## 🔴 Red: Write a Failing Test
 
-### Green: Write the Minimum Code to Pass
+1. Write ONE test for the smallest next behavior
+2. Name it clearly: `should return 0 for empty cart`
+3. Use Arrange-Act-Assert. Assert specific values.
+4. **Run it. It MUST fail.** Passes? Either behavior exists (move on) or test is wrong (fix it).
+5. Confirm the failure message tells you what's missing.
 
-1. Write the **simplest, most obvious code** that makes the failing test pass
-2. Don't generalize. Don't make it elegant. Don't handle cases the test doesn't cover.
-3. Hardcoding is fine if only one test exists for that path — the next test will force generalization
-4. **Run the test. It MUST pass.** If it doesn't, fix the code (not the test — the test defined the behavior)
-5. Run ALL tests. Nothing previously passing should break.
+---
 
-### Refactor: Clean Up Without Changing Behavior
+## 🟢 Green: Write Minimum Code to Pass
 
-1. Look for: duplication, unclear names, functions doing too much, magic values
-2. Make ONE improvement at a time
-3. **Run ALL tests after each change.** If anything breaks, undo immediately.
-4. Stop refactoring when the code is clean enough — don't gold-plate
+1. Write the **simplest code** that makes the test pass — no more.
+2. Hardcoding is fine if only one test covers that path.
+3. **Run it. It MUST pass.** Fails? Fix the code, not the test.
+4. Run ALL tests. Nothing previously passing should break.
 
-## Choosing What to Test Next
+---
 
-Work from simple to complex:
-1. **Degenerate cases** — null input, empty collection, zero
-2. **Happy path** — the simplest valid input
-3. **Variations** — different valid inputs that exercise different branches
-4. **Edge cases** — boundary values, max sizes, special characters
-5. **Error cases** — invalid input, failures, exceptions
-6. **Integration** — how this connects to the rest of the system
+## 🔵 Refactor: Clean Up Without Changing Behavior
 
-Each test should require a small code change. If you need to write more than ~10 lines of production code to pass a test, the test is too big — split it.
+1. Fix: duplication, unclear names, magic values, bloated functions.
+2. One improvement at a time.
+3. **Run ALL tests after each change.** Anything breaks? Undo.
+4. Stop when clean — don't over-engineer.
+
+---
+
+## What to Test Next
+
+Simple → complex:
+1. Degenerate cases (null, empty, zero)
+2. Happy path
+3. Variations (different valid inputs)
+4. Edge cases (boundaries, limits)
+5. Error cases (invalid input, failures)
+6. Integration
+
+Each test should require ~10 lines of production code max. More? Split the test.
 
 ## Rules
 
-- **Never write production code without a failing test that demands it.**
-- **Never write more than one failing test at a time.** One red → green → refactor cycle at a time.
-- **The test drives the design.** If the code is hard to test, the design is wrong — change the design, not the test approach.
-- **Don't mock what you own.** If you need to mock your own code to test it, the code needs restructuring.
-- **Commit after each green+refactor cycle.** Small, passing, meaningful commits.
+- No production code without a failing test.
+- One failing test at a time.
+- Hard to test = bad design. Fix the design, not the test approach.
+- Don't mock what you own.
+- Commit after each 🟢 + 🔵 cycle.
 
-## Output
+## After Each Cycle
 
-After each cycle, briefly state:
-- **Test**: what behavior was added
-- **Code**: what changed to make it pass
-- **Refactor**: what was cleaned up (or "none needed")
+State briefly:
+- **🔴 Test**: what behavior was added
+- **🟢 Code**: what changed
+- **🔵 Refactor**: what was cleaned up (or "none")
 
-When the feature is complete, provide a summary of all behaviors covered and any gaps that would need integration or manual testing.
+When done, summarize all behaviors covered and any gaps needing integration or manual testing.

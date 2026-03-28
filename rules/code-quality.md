@@ -1,5 +1,21 @@
 ---
-alwaysApply: true
+paths:
+  - "src/**"
+  - "lib/**"
+  - "app/**"
+  - "packages/**"
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.js"
+  - "**/*.jsx"
+  - "**/*.py"
+  - "**/*.go"
+  - "**/*.rs"
+  - "**/*.rb"
+  - "**/*.java"
+  - "**/*.kt"
+  - "**/*.swift"
+  - "**/*.cs"
 ---
 
 # Code Quality

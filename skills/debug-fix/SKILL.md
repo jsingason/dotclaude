@@ -12,7 +12,7 @@ Find and fix the following issue:
 ## Step 1: Understand the Problem
 
 Determine what kind of input this is:
-- **Issue number** → fetch it: `gh issue view $ARGUMENTS` (GitHub), or check the project's issue tracker
+- **Issue number** → use /git-version-control to fetch it
 - **Error message / stack trace** → parse it for file, line, error type, and the call chain leading to it
 - **Description of behavior** → identify what's expected vs what's happening
 - **URL / screenshot** → examine the referenced resource
@@ -59,3 +59,4 @@ Follow this sequence — don't skip ahead to guessing:
 - Create a branch if not already on one
 - Stage only the relevant files (fix + test, nothing else)
 - Commit with a message that references the issue if one exists: `fix: <what was wrong and why> (#number)`
+- If you hit wrong assumptions, misread conventions, or chased a false hypothesis during this session — invoke /learn-lesson

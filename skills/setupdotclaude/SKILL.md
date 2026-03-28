@@ -24,6 +24,8 @@ Before anything else, delete files inside `.claude/` that exist for the dotclaud
 
 Also delete `.claude/CLAUDE.md` if it exists — CLAUDE.md belongs at the project root, not inside `.claude/`.
 
+Never delete `.claude/rules/lessons.md` — it contains project-specific lessons learned.
+
 ## Phase 1: Detect Tech Stack
 
 Scan for package manifests, config files, and folder structure to detect: language, framework, package manager, test framework, linter/formatter, architecture pattern, and source/test directories.
@@ -42,6 +44,13 @@ Detect folder structure pattern (feature-based, layered, monorepo, MVC) and loca
 
 Check `git log --oneline -20` for commit message style.
 
+Detect git hosting from `git remote get-url origin`:
+- `github.com` → gh
+- `gitlab.com` or gitlab self-hosted pattern → glab
+- `dev.azure.com` or `visualstudio.com` → az repos
+- `bitbucket.org` → none (no standard CLI)
+- SSH or unrecognized → unknown, ask user
+
 ## Phase 2: Present Findings
 
 Present a summary to the user using AskUserQuestion:
@@ -56,6 +65,8 @@ I scanned your project. Here's what I found:
 **Architecture**: [layered/feature-based/monorepo/etc.]
 **Source dirs**: [list]
 **Test dirs**: [list]
+**Git remote**: [url]
+**Git CLI (detected)**: [gh / glab / az repos / none / unknown]
 
 Should I customize the .claude/ files based on this? (yes/no/corrections)
 ```
@@ -83,6 +94,72 @@ Update permissions to match actual commands:
 - Replace `npm run` with the actual package manager (`pnpm run`, `yarn`, `bun run`, `cargo`, `go`, `make`, `python -m pytest`, etc.)
 - Add project-specific allow rules for detected scripts
 - Keep deny rules for secrets as-is (these are universal)
+
+### 3.2b — Detect Build/Test/Lint Commands for Skill Allowed-Tools
+
+Detect the project's actual build, test, and lint commands:
+- **Node.js**: read `package.json` scripts for `build`, `test`, `lint`, `typecheck`
+- **Go**: `go build ./...`, `go test ./...`, `golangci-lint run` (if installed)
+- **Rust**: `cargo build`, `cargo test`, `cargo clippy`
+- **Python**: `pytest` or `python -m pytest` (check deps), `ruff check .` or `flake8`
+- **.NET**: `dotnet build`, `dotnet test`
+- **Make**: grep Makefile for `build:`, `test:`, `lint:` targets
+
+Present to user and confirm:
+
+```
+Detected commands:
+  build: [command or "not found"]
+  test:  [command or "not found"]
+  lint:  [command or "not found"]
+
+Update skill allowed-tools with these? (yes/no/edit)
+```
+
+After confirmation, update `allowed-tools` frontmatter in skill files:
+- `skills/hotfix/SKILL.md`: replace `Bash(npm run test *)` and `Bash(npm run build)` with detected commands (e.g. `Bash(pnpm run test *)`, `Bash(go test *)`)
+- `skills/ship/SKILL.md`: add lint command to `allowed-tools` if detected (e.g. `Bash(pnpm run lint)`)
+
+**Restart required**: `allowed-tools` loads at session start. Tell the user to restart Claude Code after setup completes.
+
+If no build system is detected, skip this section and note it.
+
+### 3.2c — Git Hosting CLI
+
+Ask the user to confirm (or correct) the detected CLI:
+
+```
+Which CLI do you use for PR/MR/issue operations?
+  1. gh       — GitHub CLI
+  2. glab     — GitLab CLI
+  3. az repos — Azure DevOps CLI
+  4. none     — I'll create PRs manually
+  5. other    — specify the command prefix
+```
+
+All git hosting configuration lives in one file: `skills/git-version-control/SKILL.md`. After confirming, update only that file:
+
+**1. `allowed-tools` frontmatter** — replace `Bash(gh *)` with the appropriate entry:
+- glab → `Bash(glab *)`
+- az repos → `Bash(az *)`
+- none → remove the entry entirely
+- other → `Bash([prefix] *)`
+
+**2. `# Hosting CLI:` line** — update the name (e.g. `# Hosting CLI: glab`)
+
+**3. Command Reference table** — replace all `gh` commands with the platform's equivalents:
+
+| Operation | glab | az repos | none |
+|-----------|------|----------|------|
+| Create PR/MR | `glab mr create --title "$T" --description "$B"` | `az repos pr create --title "$T" --description "$B"` | *(manual — provide branch + title/body to user)* |
+| Check existing | `glab mr view` | `az repos pr list --source-branch $BRANCH` | — |
+| Fetch details | `glab mr view $N --output json` | `az repos pr show --id $N` | — |
+| Fetch diff | `glab mr diff $N` | *(no direct equivalent — use `git diff`)* | — |
+| Check CI | `glab mr checks $N` | `az pipelines runs list --branch $BRANCH` | — |
+| Review comments | `glab mr note list $N` | `az repos pr reviewer list --id $N` | — |
+| Fetch issue | `glab issue view $N` | `az boards work-item show --id $N` | — |
+
+No other skill files need editing — they all delegate to /git-version-control.
 
 ### 3.3 — rules/code-quality.md
 
@@ -144,9 +221,10 @@ All skills are methodology-based and project-agnostic. Leave unchanged.
 
 - **frontend-designer.md**: delete if no frontend files exist
 - **doc-reviewer.md**: delete if the project has no documentation directory (no `docs/`, `doc/`, or significant `.md` files beyond README)
-- **security-reviewer.md**: keep (security applies everywhere)
+- **security-reviewer.md**: keep (universal)
 - **code-reviewer.md**: keep (universal)
 - **performance-reviewer.md**: keep (universal)
+- **orchestrator.md**: keep (universal — coordinates all reviewers)
 
 ## Phase 4: Review & Simplify
 
@@ -177,6 +255,8 @@ Setup complete. Here's what was customized:
 
 - CLAUDE.md: updated commands for [stack]
 - settings.json: permissions updated for [package manager]
+- skills/hotfix/SKILL.md + skills/ship/SKILL.md: allowed-tools updated for [commands]
+- CLAUDE.md + skill allowed-tools: git CLI configured for [gh/glab/az repos/none]
 - rules/security.md: paths updated to [actual dirs]
 - rules/frontend.md: [kept/removed]
 - hooks/format-on-save.sh: enabled [formatter]

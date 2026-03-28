@@ -1,57 +1,31 @@
 # Rules
 
-Rules are modular instruction files that Claude loads automatically. They extend CLAUDE.md without bloating it.
+Modular instructions. Auto-loaded per scope.
 
-- `alwaysApply: true` — loaded every session, regardless of what files are open
-- `paths: [...]` — loaded only when working with files matching the glob patterns
+- `alwaysApply: true` — every session
+- `paths: [...]` — only when touching matching files
 
-## Available Rules
+## Available
 
-### code-quality.md
-**Scope**: Always
+**code-quality.md** — Source files. Principles, naming, comments, code markers, file organization.
 
-Principles (single-responsibility, no premature abstraction, composition over inheritance), naming conventions (files, variables, functions, constants), comment guidelines, code markers (TODO/FIXME/HACK/NOTE), and file organization (import order, export patterns, function ordering).
+**testing.md** — Test files. Behavior-not-implementation, single-file runs, no flaky tests, AAA structure.
 
-### testing.md
-**Scope**: Always
+**security.md** — `src/api/**`, `src/auth/**`, routes, controllers. Input validation, queries, tokens, headers.
 
-Three focused principles: test behavior not implementation, run single test files not the full suite, fix or delete flaky tests. Comprehensive test writing is handled by the `test-writer` skill.
+**frontend.md** — `*.tsx/jsx/vue/svelte/css/html`, components/, pages/. Design tokens, accessibility, performance.
 
-### security.md
-**Scope**: Path-scoped (`src/api/**`, `src/auth/**`, `src/middleware/**`, `**/routes/**`, `**/controllers/**`)
+**database.md** — Migration dirs. No modifying existing, always reversible, no seeding in migrations.
 
-Loads when touching API or auth code. Covers input validation, parameterized queries, XSS prevention, token handling, secret logging, constant-time comparison, security headers, rate limiting.
+**error-handling.md** — API/service/handler dirs. Typed errors, consistent HTTP shapes, no stack traces in responses.
 
-### frontend.md
-**Scope**: Path-scoped (`**/*.tsx`, `**/*.jsx`, `**/*.vue`, `**/*.svelte`, `**/*.css`, `**/*.scss`, `**/*.html`, `**/components/**`, `**/pages/**`, etc.)
-
-Loads when touching frontend files. Design token requirements, design principles pick-list, component framework options, layout rules, accessibility (WCAG 2.1 AA), performance.
-
-## Adding Your Own
-
-Create a new `.md` file in this directory:
-
-```yaml
----
-alwaysApply: true
----
-
-# Your Rule Name
-
-- Your instructions here
-```
-
-Or path-scoped:
+## Add Your Own
 
 ```yaml
 ---
 paths:
   - "src/your-area/**"
 ---
-
-# Your Rule Name
-
-- Instructions that only apply when touching these files
+# Rule Name
+- instructions
 ```
-
-See [Claude Code docs](https://code.claude.com/docs/en/memory#path-specific-rules) for glob pattern syntax.

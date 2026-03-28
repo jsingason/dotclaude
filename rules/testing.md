@@ -1,5 +1,17 @@
 ---
-alwaysApply: true
+paths:
+  - "**/*.test.ts"
+  - "**/*.test.tsx"
+  - "**/*.test.js"
+  - "**/*.test.jsx"
+  - "**/*.spec.ts"
+  - "**/*.spec.tsx"
+  - "**/*.spec.js"
+  - "**/test/**"
+  - "**/tests/**"
+  - "**/__tests__/**"
+  - "**/*_test.go"
+  - "**/*_test.py"
 ---
 
 # Testing

@@ -5,7 +5,6 @@ argument-hint: "[issue number, error message, or description of production probl
 disable-model-invocation: true
 allowed-tools:
   - Bash(git *)
-  - Bash(gh *)
   - Bash(npm run test *)
   - Bash(npm run build)
   - Read
@@ -26,7 +25,7 @@ Emergency production fix. Speed matters — make the smallest correct change, ve
 
 ## Step 2: Understand the Problem
 
-- If `$ARGUMENTS` is a GitHub issue number: fetch it with `gh issue view`
+- If `$ARGUMENTS` is an issue number: use /git-version-control to fetch it
 - If it's an error message or description: search the codebase for the relevant code
 - Identify the root cause — trace from symptom to source
 - **Briefly state** what you found and your proposed fix to the user
@@ -55,11 +54,15 @@ Emergency production fix. Speed matters — make the smallest correct change, ve
 - Draft a commit message: `hotfix: <short description>` with a brief explanation
 - **ASK the user to confirm** the commit message
 - Push with `git push -u origin hotfix/<description>`
-- Create a PR targeting the production branch:
+- Use /git-version-control to create a PR targeting the production branch:
   - Title: `[HOTFIX] <description>`
   - Body: what broke, what caused it, what this fixes
-  - Add label `hotfix` if the repo has it: `gh pr create ... --label hotfix` (fall back to no label if it fails)
+  - Add label `hotfix` if the platform supports it (fall back to no label if it fails)
 - Show the PR URL
+
+## Step 6: Learn
+
+If anything unexpected surfaced during this hotfix — wrong assumption about the codebase, misread config, unanticipated dependency — invoke /learn-lesson before closing out.
 
 ## Rules
 
