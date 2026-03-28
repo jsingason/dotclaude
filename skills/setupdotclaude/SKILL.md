@@ -32,7 +32,7 @@ Scan for package manifests, config files, and folder structure to detect: langua
 
 Check: `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `Gemfile`, `composer.json`, `build.gradle`, `pom.xml`, `Makefile`, `Dockerfile`.
 
-Check for monorepo indicators: `workspaces` key in package.json, `pnpm-workspace.yaml`, `lerna.json`, `nx.json`, `turbo.json`, or multiple `package.json` files at depth 2+. If a monorepo is detected, ask the user which packages/apps to focus on and customize rule path patterns to include package prefixes (e.g., `packages/api/src/**` instead of `src/**`).
+Check for monorepo indicators: `workspaces` key in package.json, `pnpm-workspace.yaml`, `lerna.json`, `nx.json`, `turbo.json`, or multiple `package.json` files at depth 2+. If a monorepo is detected, set a `MONOREPO=true` flag and proceed to Phase 2c after Phase 2b.
 
 Detect frameworks from dependencies and config files (frontend, backend, CSS, components, ORM/DB).
 
@@ -110,13 +110,45 @@ Which do you prefer? (1/2, default: 1)
 
 If worktrees: add a line to `CLAUDE.md` under the Workflow section: "Use `git worktree` for feature isolation — don't checkout branches in the main working directory."
 
+## Phase 2c: Monorepo Package Mapping _(only if MONOREPO=true)_
+
+Enumerate all packages/apps in the repo. For each candidate directory, score it:
+
+**Include** (gets its own CLAUDE.md) if it has ANY of:
+- Own manifest (`package.json`, `Cargo.toml`, `pyproject.toml`, `go.mod`) with a `build` or `test` script/target
+- A `src/` or `lib/` directory containing source files
+- A framework config file (`next.config.*`, `vite.config.*`, `astro.config.*`, `nuxt.config.*`, etc.)
+
+**Skip automatically** if it matches ANY of:
+- Name contains `generated`, `gen`, `.generated`, or `__generated__`
+- Manifest has no scripts and no `src/`/`lib/` (config-only package)
+- Fewer than 3 source files total
+- Is inside `node_modules/`, `dist/`, `build/`, `.turbo/`, `.next/`
+- Is a pure type-definitions package (only `.d.ts` files, no `.ts`/`.js` source)
+
+**Present findings and confirm:**
+
+```
+Monorepo detected. Proposed CLAUDE.md files:
+
+  ✓ apps/web        — [detected framework, e.g. Next.js app]
+  ✓ apps/api        — [detected framework, e.g. Express backend]
+  ✓ packages/ui     — [e.g. component library]
+  ✗ packages/tsconfig — config-only, no src
+  ✗ packages/types  — type definitions only
+
+Create CLAUDE.md for each ✓ package plus a minimal root CLAUDE.md? (yes / adjust list)
+```
+
+If the user adjusts the list, update accordingly. Store the final list as `MONOREPO_PACKAGES` for use in Phase 3.1.
+
 ## Phase 3: Customize Each File
 
 For each file below, propose the specific changes and ask the user to confirm before applying.
 
 ### 3.1 — CLAUDE.md
 
-Replace the template commands with actual commands from the detected manifest:
+**Non-monorepo:** Replace the template commands with actual commands from the detected manifest:
 - **Build**: actual build command from package.json scripts, Makefile targets, etc.
 - **Test**: actual test command + how to run a single test file
 - **Lint/Format**: actual lint and format commands
@@ -124,6 +156,42 @@ Replace the template commands with actual commands from the detected manifest:
 - **Architecture**: replace placeholder directories with actual project structure (only non-obvious parts)
 
 Remove sections that don't apply (e.g., Architecture section for a single-file utility).
+
+---
+
+**Monorepo (MONOREPO=true):** Create two kinds of CLAUDE.md files.
+
+**Root CLAUDE.md** — minimal, shared concerns only:
+
+```markdown
+## Packages
+
+- `<path>/` — <one-line description> → see [<path>/CLAUDE.md](<path>/CLAUDE.md)
+(repeat for each package in MONOREPO_PACKAGES)
+
+## Workflow
+[shared workflow — e.g. worktree preference, typecheck habit]
+
+## Agents
+[shared agent routing — same as non-monorepo template]
+
+## Don'ts
+[shared don'ts]
+```
+
+Omit Commands, Architecture, Domain Knowledge, Key Decisions — those live per-package.
+
+**Per-package CLAUDE.md** — full template scoped to that package. For each package in `MONOREPO_PACKAGES`:
+
+1. If a CLAUDE.md already exists at that path, ask: `<path>/CLAUDE.md already exists. Update it, skip it, or view it first? (update/skip/view)`
+2. Run the same stack detection as Phase 1 scoped to that package directory
+3. Write a CLAUDE.md with:
+   - **Commands**: from that package's manifest scripts
+   - **Architecture**: that package's `src/` structure (non-obvious parts only)
+   - **Key Decisions** and **Domain Knowledge**: if discoverable from code/comments
+   - Omit Agents and Workflow (inherited from root)
+
+Confirm with the user before writing each file.
 
 ### 3.2 — settings.json
 
@@ -300,7 +368,7 @@ After everything is finalized, present a summary:
 ```
 Setup complete. Here's what was customized:
 
-- CLAUDE.md: updated commands for [stack]
+- CLAUDE.md: [non-monorepo: updated commands for stack | monorepo: minimal root + per-package files for X packages]
 - settings.json: permissions updated for [package manager]
 - skills/hotfix/SKILL.md + skills/ship/SKILL.md: allowed-tools updated for [commands]
 - CLAUDE.md + skill allowed-tools: git CLI configured for [gh/glab/az repos/none]
